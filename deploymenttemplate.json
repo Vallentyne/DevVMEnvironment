@@ -1,12 +1,51 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
-    "parameters": {},
-    "functions": [],
+    "parameters": {
+        "logAnalyticsWorkspace1": {
+            "type": "string",
+            "metadata": {
+                "description": "LAW workspace name"
+            }
+        },
+        "windowsVM1storage": {
+            "type": "string",
+            "metadata": {
+                "description": "Diag Storage"
+            }
+        },
+        "Bastion-PublicIP": {
+            "type": "string",
+            "metadata": {
+                "description": "Public IP for Bastion"
+            }
+        },
+        "VirtualNetworkName": {
+            "type": "string",
+            "metadata": {
+                "description": "Virtual Network Name"
+            }
+        },
+        "VmName": {
+            "type": "string",
+            "metadata": {
+                "description": "Virtual Machine Name"
+            }
+        },
+        "NIC": {
+            "type": "string",
+            "metadata": {
+                "description": "VM Nic name"
+            }
+        }
+    },
+    "functions": [
+
+    ],
     "variables": {},
     "resources": [
         {
-            "name": "logAnalyticsWorkspace1",
+            "name": "[parameters('logAnalyticsWorkspace1')]",
             "type": "Microsoft.OperationalInsights/workspaces",
             "apiVersion": "2015-11-01-preview",
             "location": "[resourceGroup().location]",
@@ -20,12 +59,12 @@
             }
         },
         {
-            "name": "[toLower('windowsVM1storage')]",
+            "name": "[toLower(parameters('windowsVM1storage'))]",
             "type": "Microsoft.Storage/storageAccounts",
             "apiVersion": "2019-06-01",
             "location": "[resourceGroup().location]",
             "tags": {
-                "displayName": "windowsVM1 Storage Account"
+                "displayName": "Storage Account"
             },
             "sku": {
                 "name": "Standard_LRS"
@@ -33,7 +72,7 @@
             "kind": "Storage"
         },
         {
-            "name": "windowsVM1-PublicIP",
+            "name": "[parameters('Bastion-PublicIP')]",
             "type": "Microsoft.Network/publicIPAddresses",
             "apiVersion": "2019-11-01",
             "location": "[resourceGroup().location]",
@@ -41,46 +80,17 @@
                 "displayName": "PublicIPAddress"
             },
             "properties": {
-                "publicIPAllocationMethod": "Dynamic",
-                "dnsSettings": {
-                    "domainNameLabel": "[toLower('windowsVM1')]"
-                }
+                "publicIPAllocationMethod": "Dynamic"
             }
         },
         {
-            "name": "windowsVM1-nsg",
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2018-08-01",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "securityRules": [
-                    {
-                        "name": "nsgRule1",
-                        "properties": {
-                            "description": "description",
-                            "protocol": "Tcp",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "3389",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 100,
-                            "direction": "Inbound"
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "name": "windowsVM1-VirtualNetwork",
+            "name": "[parameters('VirtualNetworkName')]",
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2019-11-01",
             "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups', 'windowsVM1-nsg')]"
-            ],
+            "dependsOn": [          ],
             "tags": {
-                "displayName": "windowsVM1-VirtualNetwork"
+                "displayName": "VirtualNetwork"
             },
             "properties": {
                 "addressSpace": {
@@ -90,25 +100,27 @@
                 },
                 "subnets": [
                     {
-                        "name": "windowsVM1-VirtualNetwork-Subnet",
+                        "name": "AzureBastionSubnet",
                         "properties": {
-                            "addressPrefix": "10.0.0.0/24",
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'windowsVM1-nsg')]"
-                            }
+                            "addressPrefix": "10.0.0.0/27"
+                        }
+                    },
+                    {
+                        "name": "Default",
+                        "properties": {
+                            "addressPrefix": "10.1.0.0/24"
                         }
                     }
                 ]
             }
         },
         {
-            "name": "windowsVM1-NetworkInterface",
+            "name": "[parameters('NIC')]",
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2019-11-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/publicIPAddresses', 'windowsVM1-PublicIP')]",
-                "[resourceId('Microsoft.Network/virtualNetworks', 'windowsVM1-VirtualNetwork')]"
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('VirtualNetworkName'))]"
             ],
             "tags": {
                 "displayName": "windowsVM1 Network Interface"
@@ -119,11 +131,8 @@
                         "name": "ipConfig1",
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
-                            "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', 'windowsVM1-PublicIP')]"
-                            },
                             "subnet": {
-                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'windowsVM1-VirtualNetwork', 'windowsVM1-VirtualNetwork-Subnet')]"
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('VirtualNetworkName'), 'Default')]"
                             }
                         }
                     }
@@ -131,13 +140,13 @@
             }
         },
         {
-            "name": "windowsVM1",
+            "name": "[parameters('VmName')]",
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2019-07-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', toLower('windowsVM1storage'))]",
-                "[resourceId('Microsoft.Network/networkInterfaces', 'windowsVM1-NetworkInterface')]"
+                "[resourceId('Microsoft.Storage/storageAccounts', toLower(parameters('windowsVM1storage')))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('NIC'))]"
             ],
             "tags": {
                 "displayName": "windowsVM1"
@@ -153,9 +162,9 @@
                 },
                 "storageProfile": {
                     "imageReference": {
-                        "publisher": "MicrosoftWindowsServer",
-                        "offer": "WindowsServer",
-                        "sku": "2012-R2-Datacenter",
+                        "publisher": "MicrosoftWindowsDesktop",
+                        "offer": "Windows-10",
+                        "sku": "RS3-ProN",
                         "version": "latest"
                     },
                     "osDisk": {
@@ -167,14 +176,14 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', 'windowsVM1-NetworkInterface')]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('NIC'))]"
                         }
                     ]
                 },
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": true,
-                        "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', toLower('windowsVM1storage'))).primaryEndpoints.blob]"
+                        "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', parameters('windowsVM1storage'))).primaryEndpoints.blob]"
                     }
                 }
             }
