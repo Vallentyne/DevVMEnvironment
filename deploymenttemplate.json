@@ -61,11 +61,26 @@
             "metadata": {
                 "description": "description"
             }
+        },
+        "virtualMachineExtensionCustomScriptUri": {
+            "type": "string",
+            "defaultValue": "https://raw.githubusercontent.com/Vallentyne/DevVMEnvironment/main/install.ps1",
+            "metadata": {
+                "description": "description"
+            }
         }
     },
     "functions": [],
 
-    "variables": {},
+    "variables": {
+        "virtualMachineExtensionCustomScript": {
+        "name": "[format('{0}/config-app', parameters('VmName'))]",
+        "fileUris": [
+        "[parameters('virtualMachineExtensionCustomScriptUri')]"
+            ],
+      "commandToExecute": "[format('powershell -ExecutionPolicy Unrestricted -File ./{0}', last(split(parameters('virtualMachineExtensionCustomScriptUri'), '/')))]"
+        }
+        },
 
     "resources": [
         {
@@ -238,6 +253,25 @@
                         }
                 }
               ]
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2018-10-01",
+            "name": "[variables('virtualMachineExtensionCustomScript').name]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.10",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                "fileUris": "[variables('virtualMachineExtensionCustomScript').fileUris]",
+                "commandToExecute": "[variables('virtualMachineExtensionCustomScript').commandToExecute]"
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('VmName'))]"
+            ]
         },
         {
             "apiVersion": "2020-05-01",
