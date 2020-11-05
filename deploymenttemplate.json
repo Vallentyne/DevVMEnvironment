@@ -219,8 +219,7 @@
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/publicIpAddresses', parameters('Bastion-PublicIP'))]",
-                "[resourceId('Microsoft.Network/virtualNetworks', parameters('VirtualNetworkName'))]",
-                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('VirtualNetworkName'), 'AzureBastionSubnet')]"
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('VirtualNetworkName'))]"
             ],
             "properties": {
                 "ipConfigurations": [
