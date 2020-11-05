@@ -37,6 +37,18 @@
             "metadata": {
                 "description": "VM Nic name"
             }
+        },
+        "AdminUser": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "AdminPassword": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
         }
     },
     "functions": [
@@ -157,8 +169,8 @@
                 },
                 "osProfile": {
                     "computerName": "windowsVM1",
-                    "adminUsername": "adminUsername",
-                    "adminPassword": "adminPassword"
+                    "adminUsername": "[parameters('AdminUser')]",
+                    "adminPassword": "[parameters('AdminPassword')]"
                 },
                 "storageProfile": {
                     "imageReference": {
