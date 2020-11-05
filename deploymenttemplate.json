@@ -108,7 +108,7 @@
                     {
                         "name": "Default",
                         "properties": {
-                            "addressPrefix": "10.0.1.0/24"
+                            "addressPrefix": "10.0.0.32/27"
                         }
                     }
                 ]
