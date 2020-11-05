@@ -7,6 +7,8 @@ Creates the following:
 - Bastion and required assets
 - Log Analytics Workspace
 - Diagnostic Storage Account
+- Sample VM with VS Code installed, connected to Log Analytics, etc.
+
 
 
 ## Deploy the Environment:
