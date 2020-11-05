@@ -100,11 +100,14 @@
             "type": "Microsoft.Network/publicIPAddresses",
             "apiVersion": "2019-11-01",
             "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Standard"
+            },
             "tags": {
                 "displayName": "PublicIPAddress"
             },
             "properties": {
-                "publicIPAllocationMethod": "Dynamic"
+                "publicIPAllocationMethod": "Static"
             }
         },
         {
