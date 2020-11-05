@@ -16,45 +16,57 @@
         },
         "Bastion-PublicIP": {
             "type": "string",
+            "defaultValue": "Bastion-IP",
             "metadata": {
                 "description": "Public IP for Bastion"
             }
         },
+        "bastion-host-name": {
+            "type": "string",
+            "defaultValue": "Bastion-host",
+            "metadata": {
+                "description": "description"
+            }
+        },
         "VirtualNetworkName": {
             "type": "string",
+            "defaultValue": "vnet1",
             "metadata": {
                 "description": "Virtual Network Name"
             }
         },
         "VmName": {
             "type": "string",
+            "defaultValue": "Dev-vm1",
             "metadata": {
                 "description": "Virtual Machine Name"
             }
         },
         "NIC": {
             "type": "string",
+            "defaultValue": "Dev-vm1-nic",
             "metadata": {
                 "description": "VM Nic name"
             }
         },
         "AdminUser": {
             "type": "string",
+            "defaultValue": "devadmin",
             "metadata": {
                 "description": "description"
             }
         },
         "AdminPassword": {
-            "type": "string",
+            "type": "securestring",
             "metadata": {
                 "description": "description"
             }
         }
     },
-    "functions": [
+    "functions": [],
 
-    ],
     "variables": {},
+
     "resources": [
         {
             "name": "[parameters('logAnalyticsWorkspace1')]",
@@ -198,6 +210,32 @@
                         "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', parameters('windowsVM1storage'))).primaryEndpoints.blob]"
                     }
                 }
+            }
+        },
+        {
+            "apiVersion": "2020-05-01",
+            "type": "Microsoft.Network/bastionHosts",
+            "name": "[parameters('bastion-host-name')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIpAddresses', parameters('Bastion-PublicIP'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('VirtualNetworkName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('VirtualNetworkName'), 'AzureBastionSubnet')]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "IpConf",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('VirtualNetworkName'), 'AzureBastionSubnet')]"
+                            },
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', parameters('Bastion-PublicIP'))]"
+                            }
+                        }
+                    }
+                ]
             }
         }
     ],
