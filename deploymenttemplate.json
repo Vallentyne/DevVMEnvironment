@@ -345,8 +345,12 @@
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2018-10-01",
-            "name": "[concat('Dev-vm-ext',copyIndex('vmloop'))]",
+            "name": "[concat('Dev-vm-ext',copyIndex())]",
             "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "scriptloop",
+                "count": "[parameters('VmCount')]"
+            },
             "properties": {
                 "publisher": "Microsoft.Compute",
                 "type": "CustomScriptExtension",
