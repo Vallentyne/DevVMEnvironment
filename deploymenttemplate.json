@@ -89,8 +89,8 @@
         },
         "backupFabric": "Azure",
         "v2VmType": "Microsoft.Compute/virtualMachines",
-        "protectionContainer": "[concat('iaasvmcontainer;iaasvmcontainerv2;', resourceGroup().name, ';', concat('Dev-vm-',copyindex()))]",
-        "protectedItem": "[concat('vm;iaasvmcontainerv2;', resourceGroup().name, ';', concat('Dev-vm-',copyindex()))]"
+        "protectionContainer": "[concat('iaasvmcontainer;iaasvmcontainerv2;', resourceGroup().name)]",
+        "protectedItem": "[concat('vm;iaasvmcontainerv2;', resourceGroup().name)]"
     },
 
     "resources": [
