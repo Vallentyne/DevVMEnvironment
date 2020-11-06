@@ -345,7 +345,7 @@
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2018-10-01",
-            "name": "[concat('Dev-vm-ext',copyindex())]",
+            "name": "[concat('Dev-vm-ext/vm',copyindex())]",
             "location": "[resourceGroup().location]",
             "copy": {
                 "name": "scriptloop",
