@@ -363,7 +363,7 @@
         },
         
         {
-            "name": "[concat(parameters('RecoveryServiceVault'), '/', variables('backupfabric'),'/', variables('protectionContainer'), ';Dev-vm-',copyIndex(),'/',variables('protectedItem'),';Dev-vm-',copyIndex())]",
+            "name": "[concat(parameters('RecoveryServiceVault'), '/', variables('backupfabric'),'/', variables('protectionContainer'), 'Dev-vm-',copyIndex(),'/',variables('protectedItem'),';Dev-vm-',copyIndex())]",
             "apiVersion": "2020-02-02",
             "location": "[resourceGroup().location]",
             "type": "Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems",
