@@ -81,7 +81,6 @@
 
     "variables": {
         "virtualMachineExtensionCustomScript": {
-            "name": "[format('{0}/config-app', parameters('Vmcount'))]",
             "fileUris": [
             "[parameters('virtualMachineExtensionCustomScriptUri')]"
                 ],
@@ -346,7 +345,7 @@
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2018-10-01",
-            "name": "[variables('virtualMachineExtensionCustomScript').name]",
+            "name": "[concat('Dev-vm-ext',copyIndex('vmloop'))]",
             "location": "[resourceGroup().location]",
             "properties": {
                 "publisher": "Microsoft.Compute",
