@@ -375,7 +375,7 @@
             ],
             "copy": {
                 "name": "v2VmsCopy",
-                "count": "[length(parameters('VmCount'))]"
+                "count": "[parameters('VmCount')]"
             },
             "properties": {
                 "protectedItemType": "[variables('v2VmType')]",
