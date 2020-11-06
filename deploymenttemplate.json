@@ -272,7 +272,7 @@
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', toLower(parameters('windowsVM1storage')))]",
-                "[concat('Microsoft.Network/networkInterfaces/', concat(parameters('NIC'),copyindex()))]",
+                "[concat('Microsoft.Network/networkInterfaces/',parameters('NIC'),copyindex())]",
                 "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspace1'))]"
             ],
             "tags": {
