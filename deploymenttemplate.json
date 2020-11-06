@@ -324,7 +324,7 @@
                     "apiVersion": "2017-03-30",
                     "location": "[resourceGroup().location]",
                     "dependsOn": [
-                        "[concat('Microsoft.Compute/virtualMachines/', concat('Dev-vm-',copyindex()))]"
+                        "[concat('Microsoft.Compute/virtualMachines/', 'Dev-vm-',copyindex())]"
                     ],
                     "properties": {
                         "publisher": "Microsoft.EnterpriseCloud.Monitoring",
@@ -367,8 +367,8 @@
             "location": "[resourceGroup().location]",
             "type": "Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems",
             "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines', concat('Dev-vm-',copyindex()))]",
-                "[resourceId('Microsoft.RecoveryServices/vaults', parameters('RecoveryServiceVault'))]"
+                "[concat('Microsoft.Compute/virtualMachines/', 'Dev-vm-',copyindex())]",
+                "[concat('Microsoft.RecoveryServices/vaults', parameters('RecoveryServiceVault'))]"
             ],
             "copy": {
                 "name": "v2VmsCopy",
