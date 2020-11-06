@@ -299,7 +299,7 @@
                         "version": "latest"
                     },
                     "osDisk": {
-                        "name": "windowsVM1OSDisk",
+                        "name": "[concat('Dev-vm-OSDisk-',copyIndex())]",
                         "caching": "ReadWrite",
                         "createOption": "FromImage"
                     }
