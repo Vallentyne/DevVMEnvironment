@@ -68,19 +68,39 @@
             "metadata": {
                 "description": "description"
             }
+        },
+        "RecoveryServiceVault": {
+            "type": "string",
+            "defaultValue": "VMBackupVault",
+            "metadata": {
+                "description": "Vault for VM backups"
+            }
         }
     },
     "functions": [],
 
     "variables": {
         "virtualMachineExtensionCustomScript": {
-        "name": "[format('{0}/config-app', parameters('VmName'))]",
-        "fileUris": [
-        "[parameters('virtualMachineExtensionCustomScriptUri')]"
-            ],
-      "commandToExecute": "[format('powershell -ExecutionPolicy Unrestricted -File ./{0}', last(split(parameters('virtualMachineExtensionCustomScriptUri'), '/')))]"
-        }
+            "name": "[format('{0}/config-app', parameters('VmName'))]",
+            "fileUris": [
+            "[parameters('virtualMachineExtensionCustomScriptUri')]"
+                ],
+            "commandToExecute": "[format('powershell -ExecutionPolicy Unrestricted -File ./{0}', last(split(parameters('virtualMachineExtensionCustomScriptUri'), '/')))]"
         },
+
+        "Backuppolicy": {
+            "policyname": "VMbackuppolicy",
+            "scheduleRunTimes": "4:00",
+            "timeZone": "Eastern Standard Time",
+            "instantRpRetentionRangeInDays": "2",
+            "dailyRetentionDurationCount": "7",
+            "daysOfTheWeek": "Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday",
+            "weeklyRetentionDurationCount": "4",
+            "monthlyRetentionDurationCount": "2",
+            "monthsOfYear": "January, February, March, April, May, June, July, August, September, October, November, December",
+            "yearlyRetentionDurationCount": "1"
+        }
+    },
 
     "resources": [
         {
@@ -330,6 +350,91 @@
               ],
               "logAnalyticsDestinationType": "Dedicated"
           }
+        },
+        {
+            "name": "[parameters('RecoveryServiceVault')]",
+            "type": "Microsoft.RecoveryServices/vaults",
+            "apiVersion": "2018-01-10",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "RS0",
+                "tier": "Standard"
+            },
+            "properties": {
+            }
+        },
+        {
+            "apiVersion": "2016-06-01",
+            "name": "[concat(parameters('RecoveryServiceVault'), '/', variables('Backuppolicy').policyname)]",
+            "type": "Microsoft.RecoveryServices/vaults/backupPolicies",
+            "dependsOn": [
+                "[concat('Microsoft.RecoveryServices/vaults/', parameters('RecoveryServiceVault'))]"
+            ],
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "backupManagementType": "AzureIaasVM",
+                "instantRpRetentionRangeInDays": "[variables('Backuppolicy').instantRpRetentionRangeInDays]",
+                "schedulePolicy": {
+                "scheduleRunFrequency": "Daily",
+                "scheduleRunDays": null,
+                "scheduleRunTimes": "[variables('Backuppolicy').scheduleRunTimes]",
+                "schedulePolicyType": "SimpleSchedulePolicy"
+                },
+                "retentionPolicy": {
+                "dailySchedule": {
+                    "retentionTimes": "[variables('Backuppolicy').scheduleRunTimes]",
+                    "retentionDuration": {
+                    "count": "[variables('Backuppolicy').dailyRetentionDurationCount]",
+                    "durationType": "Days"
+                    }
+                },
+                "weeklySchedule": {
+                    "daysOfTheWeek": "[variables('Backuppolicy').daysOfTheWeek]",
+                    "retentionTimes": "[variables('Backuppolicy').scheduleRunTimes]",
+                    "retentionDuration": {
+                    "count": "[variables('Backuppolicy').weeklyRetentionDurationCount]",
+                    "durationType": "Weeks"
+                    }
+                },
+                "monthlySchedule": {
+                    "retentionScheduleFormatType": "Daily",
+                    "retentionScheduleDaily": {
+                    "daysOfTheMonth": [
+                        {
+                        "date": 1,
+                        "isLast": false
+                        }
+                    ]
+                    },
+                    "retentionScheduleWeekly": null,
+                    "retentionTimes": "[variables('Backuppolicy').scheduleRunTimes]",
+                    "retentionDuration": {
+                    "count": "[variables('Backuppolicy').monthlyRetentionDurationCount]",
+                    "durationType": "Months"
+                    }
+                },
+                "yearlySchedule": {
+                    "retentionScheduleFormatType": "Daily",
+                    "monthsOfYear": "[variables('Backuppolicy').monthsOfYear]",
+                    "retentionScheduleDaily": {
+                    "daysOfTheMonth": [
+                        {
+                        "date": 1,
+                        "isLast": false
+                        }
+                    ]
+                    },
+                    "retentionScheduleWeekly": null,
+                    "retentionTimes": "[variables('Backuppolicy').scheduleRunTimes]",
+                    "retentionDuration": {
+                    "count": "[variables('Backuppolicy').yearlyRetentionDurationCount]",
+                    "durationType": "Years"
+                    }
+                },
+                "retentionPolicyType": "LongTermRetentionPolicy"
+                },
+                "timeZone": "[variables('Backuppolicy').timeZone]"
+            }
         }
     ],
     "outputs": {}
