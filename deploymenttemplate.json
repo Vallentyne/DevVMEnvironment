@@ -341,7 +341,7 @@
                         }
                 },
                 {
-                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "type": "extensions",
                     "name": "scriptextension",
                     "apiVersion": "2018-10-01",
                     "location": "[resourceGroup().location]",
