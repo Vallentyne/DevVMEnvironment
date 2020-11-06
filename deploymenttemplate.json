@@ -368,7 +368,7 @@
             "type": "Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems",
             "dependsOn": [
                 "[concat('Microsoft.Compute/virtualMachines/', 'Dev-vm-',copyindex())]",
-                "[concat('Microsoft.RecoveryServices/vaults', parameters('RecoveryServiceVault'))]"
+                "[concat('Microsoft.RecoveryServices/vaults/', parameters('RecoveryServiceVault'))]"
             ],
             "copy": {
                 "name": "v2VmsCopy",
