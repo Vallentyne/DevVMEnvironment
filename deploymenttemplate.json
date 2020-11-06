@@ -341,23 +341,23 @@
                         }
                 },
                 {
-                    "type": "extensions",
-                    "name": "scriptextension",
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "name": "[concat('Dev-vm/','scriptextension')]",
                     "apiVersion": "2018-10-01",
                     "location": "[resourceGroup().location]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Compute/virtualMachines', concat('Dev-vm-',copyindex()))]"
+                        ],
                     "properties": {
                         "publisher": "Microsoft.Compute",
                         "type": "CustomScriptExtension",
                         "typeHandlerVersion": "1.10",
                         "autoUpgradeMinorVersion": true,
                         "settings": {
-                        "fileUris": "[variables('virtualMachineExtensionCustomScript').fileUris]",
-                        "commandToExecute": "[variables('virtualMachineExtensionCustomScript').commandToExecute]"
-                        }
-                    },
-                    "dependsOn": [
-                        "[resourceId('Microsoft.Compute/virtualMachines', concat('Dev-vm-',copyindex()))]"
-                    ]
+                            "fileUris": "[variables('virtualMachineExtensionCustomScript').fileUris]",
+                            "commandToExecute": "[variables('virtualMachineExtensionCustomScript').commandToExecute]"
+                            }
+                        }                    
                 }
             ]
         },
