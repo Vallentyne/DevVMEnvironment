@@ -339,32 +339,29 @@
                             "workspaceKey": "[listKeys(resourceId(resourceGroup().name,'Microsoft.OperationalInsights/workspaces', parameters('loganalyticsWorkspace1')), '2015-03-20').primarySharedKey]"
                             }
                         }
+                },
+                {
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "name": "scriptextension",
+                    "apiVersion": "2018-10-01",
+                    "location": "[resourceGroup().location]",
+                    "properties": {
+                        "publisher": "Microsoft.Compute",
+                        "type": "CustomScriptExtension",
+                        "typeHandlerVersion": "1.10",
+                        "autoUpgradeMinorVersion": true,
+                        "settings": {
+                        "fileUris": "[variables('virtualMachineExtensionCustomScript').fileUris]",
+                        "commandToExecute": "[variables('virtualMachineExtensionCustomScript').commandToExecute]"
+                        }
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Compute/virtualMachines', concat('Dev-vm-',copyindex()))]"
+                    ]
                 }
-              ]
-        },
-        {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "2018-10-01",
-            "name": "[concat('Dev-vm-',copyindex())]",
-            "location": "[resourceGroup().location]",
-            "copy": {
-                "name": "scriptloop",
-                "count": "[parameters('VmCount')]"
-            },
-            "properties": {
-                "publisher": "Microsoft.Compute",
-                "type": "CustomScriptExtension",
-                "typeHandlerVersion": "1.10",
-                "autoUpgradeMinorVersion": true,
-                "settings": {
-                "fileUris": "[variables('virtualMachineExtensionCustomScript').fileUris]",
-                "commandToExecute": "[variables('virtualMachineExtensionCustomScript').commandToExecute]"
-                }
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines', concat('Dev-vm-',copyindex()))]"
             ]
         },
+        
         {
             "name": "[concat(parameters('RecoveryServiceVault'), '/', variables('backupFabric'), '/vmbackups', '/', variables('protectedItem'),'/Dev-vm-',copyIndex())]",
             "apiVersion": "2020-02-02",
