@@ -35,18 +35,18 @@
                 "description": "Virtual Network Name"
             }
         },
-        "VmName": {
-            "type": "string",
-            "defaultValue": "Dev-vm1",
+        "VmCount": {
+            "type": "int",
+            "defaultValue": "2",
             "metadata": {
-                "description": "Virtual Machine Name"
+                "description": "Number of VMs to be created"
             }
         },
         "NIC": {
             "type": "string",
-            "defaultValue": "Dev-vm1-nic",
+            "defaultValue": "Dev-nic",
             "metadata": {
-                "description": "VM Nic name"
+                "description": "VM Nic name prefix"
             }
         },
         "AdminUser": {
@@ -81,25 +81,16 @@
 
     "variables": {
         "virtualMachineExtensionCustomScript": {
-            "name": "[format('{0}/config-app', parameters('VmName'))]",
+            "name": "[format('{0}/config-app', parameters('Vmcount'))]",
             "fileUris": [
             "[parameters('virtualMachineExtensionCustomScriptUri')]"
                 ],
             "commandToExecute": "[format('powershell -ExecutionPolicy Unrestricted -File ./{0}', last(split(parameters('virtualMachineExtensionCustomScriptUri'), '/')))]"
         },
-
-        "Backuppolicy": {
-            "policyname": "VMbackuppolicy",
-            "scheduleRunTimes": "4:00",
-            "timeZone": "Eastern Standard Time",
-            "instantRpRetentionRangeInDays": "2",
-            "dailyRetentionDurationCount": "7",
-            "daysOfTheWeek": "Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday",
-            "weeklyRetentionDurationCount": "4",
-            "monthlyRetentionDurationCount": "2",
-            "monthsOfYear": "January, February, March, April, May, June, July, August, September, October, November, December",
-            "yearlyRetentionDurationCount": "1"
-        }
+        "backupFabric": "Azure",
+        "v2VmType": "Microsoft.Compute/virtualMachines",
+        "protectionContainer": "[concat('iaasvmcontainer;iaasvmcontainerv2;', resourceGroup().name, ';', concat('Dev-vm-',copyindex()))]",
+        "protectedItem": "[concat('vm;iaasvmcontainerv2;', resourceGroup().name, ';', concat('Dev-vm-',copyindex()))]"
     },
 
     "resources": [
@@ -177,123 +168,6 @@
             }
         },
         {
-            "name": "[parameters('NIC')]",
-            "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2019-11-01",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks', parameters('VirtualNetworkName'))]"
-            ],
-            "tags": {
-                "displayName": "windowsVM1 Network Interface"
-            },
-            "properties": {
-                "ipConfigurations": [
-                    {
-                        "name": "ipConfig1",
-                        "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
-                            "subnet": {
-                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('VirtualNetworkName'), 'Default')]"
-                            }
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "name": "[parameters('VmName')]",
-            "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2019-07-01",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', toLower(parameters('windowsVM1storage')))]",
-                "[resourceId('Microsoft.Network/networkInterfaces', parameters('NIC'))]",
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspace1'))]"
-            ],
-            "tags": {
-                "displayName": "windowsVM1"
-            },
-            "properties": {
-                "hardwareProfile": {
-                    "vmSize": "Standard_A2_v2"
-                },
-                "osProfile": {
-                    "computerName": "windowsVM1",
-                    "adminUsername": "[parameters('AdminUser')]",
-                    "adminPassword": "[parameters('AdminPassword')]"
-                },
-                "storageProfile": {
-                    "imageReference": {
-                        "publisher": "MicrosoftWindowsDesktop",
-                        "offer": "Windows-10",
-                        "sku": "rs5-pro",
-                        "version": "latest"
-                    },
-                    "osDisk": {
-                        "name": "windowsVM1OSDisk",
-                        "caching": "ReadWrite",
-                        "createOption": "FromImage"
-                    }
-                },
-                "networkProfile": {
-                    "networkInterfaces": [
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('NIC'))]"
-                        }
-                    ]
-                },
-                "diagnosticsProfile": {
-                    "bootDiagnostics": {
-                        "enabled": true,
-                        "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', parameters('windowsVM1storage'))).primaryEndpoints.blob]"
-                    }
-                }
-            },
-            "resources": [
-                {
-                    "type": "extensions",
-                    "name": "Microsoft.EnterpriseCloud.Monitoring",
-                    "apiVersion": "2017-03-30",
-                    "location": "[resourceGroup().location]",
-                    "dependsOn": [
-                        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
-                    ],
-                    "properties": {
-                        "publisher": "Microsoft.EnterpriseCloud.Monitoring",
-                        "type": "MicrosoftMonitoringAgent",
-                        "typeHandlerVersion": "1.0",
-                        "autoUpgradeMinorVersion": true,
-                        "settings": {
-                            "workspaceId": "[reference(resourceid(resourceGroup().name,'Microsoft.OperationalInsights/workspaces', parameters('loganalyticsWorkspace1')), '2015-11-01-preview').customerId]"
-                            },
-                        "protectedSettings": {
-                            "workspaceKey": "[listKeys(resourceId(resourceGroup().name,'Microsoft.OperationalInsights/workspaces', parameters('loganalyticsWorkspace1')), '2015-03-20').primarySharedKey]"
-                            }
-                        }
-                }
-              ]
-        },
-        {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "2018-10-01",
-            "name": "[variables('virtualMachineExtensionCustomScript').name]",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "publisher": "Microsoft.Compute",
-                "type": "CustomScriptExtension",
-                "typeHandlerVersion": "1.10",
-                "autoUpgradeMinorVersion": true,
-                "settings": {
-                "fileUris": "[variables('virtualMachineExtensionCustomScript').fileUris]",
-                "commandToExecute": "[variables('virtualMachineExtensionCustomScript').commandToExecute]"
-                }
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines', parameters('VmName'))]"
-            ]
-        },
-        {
             "apiVersion": "2020-05-01",
             "type": "Microsoft.Network/bastionHosts",
             "name": "[parameters('bastion-host-name')]",
@@ -364,78 +238,152 @@
             }
         },
         {
-            "apiVersion": "2016-06-01",
-            "name": "[concat(parameters('RecoveryServiceVault'), '/', variables('Backuppolicy').policyname)]",
-            "type": "Microsoft.RecoveryServices/vaults/backupPolicies",
+            "name": "[concat(parameters('NIC'),copyIndex())]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2019-11-01",
+            "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[concat('Microsoft.RecoveryServices/vaults/', parameters('RecoveryServiceVault'))]"
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('VirtualNetworkName'))]"
             ],
+            "tags": {
+                "displayName": "VM Network Interface"
+            },
+            "copy": {
+                "name": "nicloop",
+                "count": "[parameters('VmCount')]"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipConfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('VirtualNetworkName'), 'Default')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[concat('Dev-vm-',copyindex())]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', toLower(parameters('windowsVM1storage')))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('NIC'))]",
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspace1'))]"
+            ],
+            "tags": {
+                "displayName": "windowsVM"
+            },
+            "copy": {
+                "name": "vmloop",
+                "count": "[parameters('VmCount')]"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_D3_v2"
+                },
+                "osProfile": {
+                    "computerName": "[concat('Dev-vm-',copyindex())]",
+                    "adminUsername": "[parameters('AdminUser')]",
+                    "adminPassword": "[parameters('AdminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsDesktop",
+                        "offer": "Windows-10",
+                        "sku": "rs5-pro",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "windowsVM1OSDisk",
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('NIC'),copyIndex()))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', parameters('windowsVM1storage'))).primaryEndpoints.blob]"
+                        }
+                }
+                },
+            "resources": [
+                {
+                    "type": "extensions",
+                    "name": "Microsoft.EnterpriseCloud.Monitoring",
+                    "apiVersion": "2017-03-30",
+                    "location": "[resourceGroup().location]",
+                    "dependsOn": [
+                        "[concat('Microsoft.Compute/virtualMachines/', concat('Dev-vm-',copyindex()))]"
+                    ],
+                    "properties": {
+                        "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+                        "type": "MicrosoftMonitoringAgent",
+                        "typeHandlerVersion": "1.0",
+                        "autoUpgradeMinorVersion": true,
+                        "settings": {
+                            "workspaceId": "[reference(resourceid(resourceGroup().name,'Microsoft.OperationalInsights/workspaces', parameters('loganalyticsWorkspace1')), '2015-11-01-preview').customerId]"
+                            },
+                        "protectedSettings": {
+                            "workspaceKey": "[listKeys(resourceId(resourceGroup().name,'Microsoft.OperationalInsights/workspaces', parameters('loganalyticsWorkspace1')), '2015-03-20').primarySharedKey]"
+                            }
+                        }
+                }
+              ]
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2018-10-01",
+            "name": "[variables('virtualMachineExtensionCustomScript').name]",
             "location": "[resourceGroup().location]",
             "properties": {
-                "backupManagementType": "AzureIaasVM",
-                "instantRpRetentionRangeInDays": "[variables('Backuppolicy').instantRpRetentionRangeInDays]",
-                "schedulePolicy": {
-                "scheduleRunFrequency": "Daily",
-                "scheduleRunDays": null,
-                "scheduleRunTimes": "[variables('Backuppolicy').scheduleRunTimes]",
-                "schedulePolicyType": "SimpleSchedulePolicy"
-                },
-                "retentionPolicy": {
-                "dailySchedule": {
-                    "retentionTimes": "[variables('Backuppolicy').scheduleRunTimes]",
-                    "retentionDuration": {
-                    "count": "[variables('Backuppolicy').dailyRetentionDurationCount]",
-                    "durationType": "Days"
-                    }
-                },
-                "weeklySchedule": {
-                    "daysOfTheWeek": "[variables('Backuppolicy').daysOfTheWeek]",
-                    "retentionTimes": "[variables('Backuppolicy').scheduleRunTimes]",
-                    "retentionDuration": {
-                    "count": "[variables('Backuppolicy').weeklyRetentionDurationCount]",
-                    "durationType": "Weeks"
-                    }
-                },
-                "monthlySchedule": {
-                    "retentionScheduleFormatType": "Daily",
-                    "retentionScheduleDaily": {
-                    "daysOfTheMonth": [
-                        {
-                        "date": 1,
-                        "isLast": false
-                        }
-                    ]
-                    },
-                    "retentionScheduleWeekly": null,
-                    "retentionTimes": "[variables('Backuppolicy').scheduleRunTimes]",
-                    "retentionDuration": {
-                    "count": "[variables('Backuppolicy').monthlyRetentionDurationCount]",
-                    "durationType": "Months"
-                    }
-                },
-                "yearlySchedule": {
-                    "retentionScheduleFormatType": "Daily",
-                    "monthsOfYear": "[variables('Backuppolicy').monthsOfYear]",
-                    "retentionScheduleDaily": {
-                    "daysOfTheMonth": [
-                        {
-                        "date": 1,
-                        "isLast": false
-                        }
-                    ]
-                    },
-                    "retentionScheduleWeekly": null,
-                    "retentionTimes": "[variables('Backuppolicy').scheduleRunTimes]",
-                    "retentionDuration": {
-                    "count": "[variables('Backuppolicy').yearlyRetentionDurationCount]",
-                    "durationType": "Years"
-                    }
-                },
-                "retentionPolicyType": "LongTermRetentionPolicy"
-                },
-                "timeZone": "[variables('Backuppolicy').timeZone]"
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.10",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                "fileUris": "[variables('virtualMachineExtensionCustomScript').fileUris]",
+                "commandToExecute": "[variables('virtualMachineExtensionCustomScript').commandToExecute]"
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', concat('Dev-vm-',copyindex()))]"
+            ]
+        },
+        
+        
+        {
+            "name": "[concat(parameters('RecoveryServiceVault'), '/', variables('backupFabric'), '/', variables('protectionContainer'), '/', variables('protectedItem'))]",
+            "apiVersion": "2016-06-01",
+            "location": "[resourceGroup().location]",
+            "type": "Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', concat('Dev-vm-',copyindex()))]",
+                "[resourceId('Microsoft.RecoveryServices/vaults', parameters('RecoveryServiceVault'))]"
+            ],
+            "copy": {
+                "name": "v2VmsCopy",
+                "count": "[length(parameters('VmCount'))]"
+            },
+            "properties": {
+                "protectedItemType": "[variables('v2VmType')]",
+                "policyId": "[resourceId('Microsoft.RecoveryServices/vaults/backupPolicies',parameters('RecoveryServiceVault'),'DefaultPolicy')]",
+                "sourceResourceId": "[resourceId(resourceGroup().name,'Microsoft.Compute/virtualMachines',concat('Dev-vm-',copyindex()))]"
             }
         }
+        
     ],
     "outputs": {}
 }
