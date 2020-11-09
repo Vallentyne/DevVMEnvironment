@@ -75,6 +75,12 @@
             "metadata": {
                 "description": "Vault for VM backups"
             }
+        },
+        "NSGName": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
         }
     },
     "functions": [],
@@ -136,6 +142,30 @@
             }
         },
         {
+            "name": "[parameters('NSGName')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2019-11-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "nsgRule1",
+                        "properties": {
+                            "description": "description",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 100,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        {
             "name": "[parameters('VirtualNetworkName')]",
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2019-11-01",
@@ -144,6 +174,7 @@
             "tags": {
                 "displayName": "VirtualNetwork"
             },
+            
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [
@@ -360,9 +391,9 @@
                         }                    
                 }
             ]
-        },
+        }
         
-        {
+        /* {
             "name": "[concat(parameters('RecoveryServiceVault'), '/', variables('backupfabric'),'/', variables('protectionContainer'), 'Dev-vm-',copyIndex(),'/',variables('protectedItem'),'Dev-vm-',copyIndex())]",
             "apiVersion": "2020-02-02",
             "location": "[resourceGroup().location]",
@@ -380,7 +411,7 @@
                 "policyId": "[resourceId('Microsoft.RecoveryServices/vaults/backupPolicies',parameters('RecoveryServiceVault'),'DefaultPolicy')]",
                 "sourceResourceId": "[resourceId(resourceGroup().name,'Microsoft.Compute/virtualMachines',concat('Dev-vm-',copyindex()))]"
             }
-        }
+        } */
         
     ],
     "outputs": {}
