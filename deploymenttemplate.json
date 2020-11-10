@@ -173,7 +173,9 @@
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2019-11-01",
             "location": "[resourceGroup().location]",
-            "dependsOn": [          ],
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NSGName'))]"
+                      ],
             "tags": {
                 "displayName": "VirtualNetwork"
             },
