@@ -78,7 +78,7 @@
         },
         "NSGName": {
             "type": "string",
-            "defaultvalue": "NSG1",
+            "defaultValue": "NSG1",
             "metadata": {
                 "description": "description"
             }
