@@ -198,7 +198,7 @@
                         "name": "Default",
                         "properties": {
                             "addressPrefix": "10.0.0.32/27",
-                            "networkSecurityGroup": "[parameters('NSGName')]"
+                            "networkSecurityGroup": "[resourceid('Microsoft.Network/virtualNetworks/networksecuritygroups',parameters('NSGName'))]"
                         }
                     }
                 ]
