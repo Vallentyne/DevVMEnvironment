@@ -78,6 +78,7 @@
         },
         "NSGName": {
             "type": "string",
+            "defaultvalue": "NSG1",
             "metadata": {
                 "description": "description"
             }
@@ -88,7 +89,9 @@
     "variables": {
         "virtualMachineExtensionCustomScript": {
             "fileUris": [
-            "[parameters('virtualMachineExtensionCustomScriptUri')]"
+            "[parameters('virtualMachineExtensionCustomScriptUri')]",
+            "https://raw.githubusercontent.com/Vallentyne/DevVMEnvironment/main/Microsoft.VCLibs.x64.14.00.Desktop.appx",
+            "https://raw.githubusercontent.com/Vallentyne/DevVMEnvironment/main/Microsoft.DesktopAppInstaller.appxbundle"
                 ],
             "commandToExecute": "[format('powershell -ExecutionPolicy Unrestricted -File ./{0}', last(split(parameters('virtualMachineExtensionCustomScriptUri'), '/')))]"
         },
@@ -181,6 +184,7 @@
                         "10.0.0.0/16"
                     ]
                 },
+                
                 "subnets": [
                     {
                         "name": "AzureBastionSubnet",
@@ -191,7 +195,8 @@
                     {
                         "name": "Default",
                         "properties": {
-                            "addressPrefix": "10.0.0.32/27"
+                            "addressPrefix": "10.0.0.32/27",
+                            "networkSecurityGroup": "[parameters('NSGName')]"
                         }
                     }
                 ]

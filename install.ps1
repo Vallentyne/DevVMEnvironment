@@ -1,7 +1,8 @@
 
-Add-AppxPackage 'https://raw.githubusercontent.com/Vallentyne/DevVMEnvironment/main/Microsoft.VCLibs.x64.14.00.Desktop.appx'
 
-Add-AppxPackage 'https://raw.githubusercontent.com/Vallentyne/DevVMEnvironment/main/Microsoft.DesktopAppInstaller.appxbundle'
+Add-AppxPackage 'Microsoft.VCLibs.x64.14.00.Desktop.appx'
+
+Add-AppxPackage 'Microsoft.DesktopAppInstaller.appxbundle'
 
 
 

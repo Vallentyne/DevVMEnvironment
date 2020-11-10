@@ -7,7 +7,9 @@ Creates the following:
 - Bastion and required assets
 - Log Analytics Workspace
 - Diagnostic Storage Account
-- Sample VM with VS Code installed, connected to Log Analytics, etc.
+- Recovery Services Vault (backups not enabled for VMs automatically, remove comments in template to do this)
+- Sample VM or VMs with dev tools installed, connected to Log Analytics, etc.
+
 
 
 
