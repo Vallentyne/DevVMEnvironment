@@ -1,6 +1,6 @@
 
 
-Add-AppxPackage 'Microsoft.VCLibs.x64.14.00.Desktop.appx'
+Add-AppxPackage 'Microsoft.VCLibs.x64.14.00.Desktop.appx' -registerbyfamilyname
 
 Add-AppxPackage 'Microsoft.DesktopAppInstaller.appxbundle'
 
