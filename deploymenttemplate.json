@@ -199,7 +199,7 @@
                         "properties": {
                             "addressPrefix": "10.0.0.32/27",
                             "networkSecurityGroup": {
-                            "id": "[resourceid('Microsoft.Network/networksecuritygroups',parameters('NSGName'))]"
+                            "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NSGName'))]"
                             }
                         }
                     }
