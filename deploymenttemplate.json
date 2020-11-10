@@ -89,9 +89,7 @@
     "variables": {
         "virtualMachineExtensionCustomScript": {
             "fileUris": [
-            "[parameters('virtualMachineExtensionCustomScriptUri')]",
-            "https://raw.githubusercontent.com/Vallentyne/DevVMEnvironment/main/Microsoft.VCLibs.x64.14.00.Desktop.appx",
-            "https://raw.githubusercontent.com/Vallentyne/DevVMEnvironment/main/Microsoft.DesktopAppInstaller.appxbundle"
+            "[parameters('virtualMachineExtensionCustomScriptUri')]"
                 ],
             "commandToExecute": "[format('powershell -ExecutionPolicy Unrestricted -File ./{0}', last(split(parameters('virtualMachineExtensionCustomScriptUri'), '/')))]"
         },
