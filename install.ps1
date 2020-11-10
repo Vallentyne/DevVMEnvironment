@@ -1,36 +1,9 @@
+Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 
-
-Add-AppxPackage -path '.\Microsoft.VCLibs.x64.14.00.Desktop.appx'
-
-Add-AppxPackage -path '.\Microsoft.DesktopAppInstaller.appxbundle'
-
-
-
-<#---------------------------
-IDEs and Dev Tools
----------------------------#>
-winget install Microsoft.VisualStudioCode;
-winget install Git.Git;
-winget install Python.Python;
-winget install OpenJS.Nodejs;
-
-<#---------------------------
-Browsers + Web Dev Tools
----------------------------#>
-winget install Microsoft.Edge;
-winget install Google.Chrome;
-winget install lukehaas.RunJS; 
-winget install Toinane.Colorpicker;
-
-<#---------------------------
-Utilities
----------------------------#>
-winget install Microsoft.WindowsTerminal;
-winget install Devolutions.RemoteDesktopManagerFree; 
-winget install TimKosse.FilezillaClient; 
-winget install PenguinLabs.Cacher;
-winget install Notepad++.Notepad++;
-winget install PuTTY.PuTTY;
-winget install vim.vim;
-
+choco install vscode -y 
+choco install git -y 
+choco install python -y 
+choco install nodejs -y 
+choco install googlechrome -y 
+choco install microsoft-edge -y 
 
