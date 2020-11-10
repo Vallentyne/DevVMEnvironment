@@ -162,7 +162,7 @@
                             "destinationAddressPrefix": "*",
                             "access": "Allow",
                             "priority": 100,
-                            "direction": "Inbound"
+                            "direction": "Outbound"
                         }
                     }
                 ]
